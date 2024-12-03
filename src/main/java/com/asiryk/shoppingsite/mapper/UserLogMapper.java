@@ -32,7 +32,7 @@ public interface UserLogMapper {
                                   Pageable pageable);
 
     @Select("SELECT * FROM user_activity_logs ORDER BY activity_date DESC")
-    Page<UserLog> findAll(Pageable pageable);
+    List<UserLog> findAll();
 
     // 分页查询日志，支持过滤日期范围
 // Mapper接口

@@ -33,50 +33,42 @@ public class UserLogController {
     @Autowired
     private ProductMapper productMapper;
 
+    // 获取日志记录
     @GetMapping
-    public Result getLogs(
-            @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "2020-01-01 20:38:05") String startDate,
-            @RequestParam(defaultValue = "2100-01-01 20:38:05") String endDate) {
+    public Result getLogs() {
 
-        // 设置分页
-        PageHelper.startPage(pageNumber, pageSize);
-        PageInfo<UserLog> pageInfo = userLogMapper.findLogsWithPagination(pageNumber, pageSize, startDate, endDate);
-
-        // 如果没有查询到数据，返回一个提示信息
-        if (pageInfo.getList().isEmpty()) {
-            System.out.println("error");
-            Map<String, Object> response = new HashMap<>();
-            response.put("logs", pageInfo.getList());
-            response.put("totalLogs", 0);
-            return Result.success("没有找到符合条件的日志记录");
-        }
+        List<UserLog> pageInfo = userLogMapper.findAll(); // 获取日志记录
 
         // 填充用户名和商品名
-        for (UserLog log : pageInfo.getList()) {
-            log.setUserName(userMapper.getNameById(log.getUserId()));  // 填充用户名
-            log.setProductName(productMapper.getNameById(log.getProductId()));  // 填充商品名
+        for (UserLog log : pageInfo) {  // 遍历所有日志记录
+            log.setUserName(userMapper.getNameById(log.getUserId()));  // 根据 userId 填充用户名
+            log.setProductName(productMapper.getNameById(log.getProductId()));  // 根据 productId 填充商品名
         }
 
+        // 返回日志列表和总日志数
         Map<String, Object> result = new HashMap<>();
-        result.put("logs", pageInfo.getList());
-        result.put("totalLogs", pageInfo.getTotal());
-        return Result.success(result);
+        result.put("logs", pageInfo);  // 放入日志记录列表
+        result.put("totalLogs", pageInfo.size());  // 放入总日志数
+        return Result.success(result);  // 返回查询结果
     }
 
+    // 新增浏览记录
     @PostMapping("/view")
     public Result addView(@RequestParam String username, @RequestParam Integer productId ) {
-        userLogService.addView(username, productId);
-        return Result.success("成功新增浏览记录");
+        userLogService.addView(username, productId);  // 调用 service 层保存浏览记录
+        return Result.success("成功新增浏览记录");  // 返回成功响应
     }
+
+    // 新增购买记录
     @PostMapping("/purchase")
     public Result addPurchase(@RequestBody PurchaseLogRequest request) {
-        String username = request.getUsername();
-        List<Integer> productIds = request.getProductIds();
-        System.out.println(productIds);
+        String username = request.getUsername();  // 获取用户名
+        List<Integer> productIds = request.getProductIds();  // 获取购买的商品 ID 列表
+        System.out.println(productIds);  // 打印商品 ID 列表，调试用
+
         // 处理日志记录逻辑
-        userLogService.addPurchase(username,productIds);
-        return Result.success("成功新增购买记录");
+        userLogService.addPurchase(username, productIds);  // 调用 service 层保存购买记录
+        return Result.success("成功新增购买记录");  // 返回成功响应
     }
+
 }

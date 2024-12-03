@@ -46,18 +46,15 @@ public class OrderController {
         if (user == null) {
             return Result.error("没有该用户");
         }
-
         int userId = user.getUserId();
-
         // 创建订单并插入 orders 表
-
         Order order = new Order();
         order.setUserId(userId);
         order.setTotalPrice(request.getTotalPrice());
         order.setStatus("已支付，待发货");
-
         orderService.addOrder(order);
         System.out.println(request.getProducts());
+
         // 插入每个订单项到 order_items 表
         for (CheckoutRequest.ProductInfo item : request.getProducts()) {
             Product product = productService.getProductByName(item.getProductName());
@@ -67,13 +64,6 @@ public class OrderController {
             orderItem.setQuantity(item.getQuantity());
             orderItem.setPrice(item.getPrice());
             orderItemService.addOrderItem(orderItem);
-//            // 更新库存：减少商品库存
-//            if (product.getStock() >= item.getQuantity()) {
-//                product.setStock(product.getStock() - item.getQuantity());
-//                productService.updateStock(product,item.getQuantity());
-//            } else {
-//                return Result.error("库存不足，无法完成支付");
-//            }
         }
 
         // 在支付成功后从购物车中移除该商品
@@ -112,15 +102,7 @@ public class OrderController {
     //销售端获取订单详情
     @GetMapping("/page")
     public Result getOrdersByPage() {
-//        // 设置分页参数
-//        PageHelper.startPage(pageNumber, pageSize);
-
-        // 根据搜索条件查询订单
         List<Order> orders = orderMapper.findAll();
-
-        // 获取分页后的订单数据
-//        PageInfo<Order> pageInfo = new PageInfo<>(orders);
-//        List<Order> orders = orderService.getOrdersByPage(pageNumber, pageSize);
         return Result.success(orders);
     }
 
@@ -147,12 +129,14 @@ public class OrderController {
     //销售统计报表
     @GetMapping("/sales")
     public Result getSales() {
-        List<Order> orders = orderService.getOrderByStatus("交易完成"); // 获取所有交易完成的订单
-        Map<Integer, Sale> salesMap = new HashMap<>(); // 使用商品ID作为键，存储销售数据
+        // 获取所有交易完成的订单
+        List<Order> orders = orderService.getOrderByStatus("交易完成");
+        // 使用商品ID作为键，存储销售数据
+        Map<Integer, Sale> salesMap = new HashMap<>();
         List<Sale> salesList = new ArrayList<>();
-
+        // 获取订单项
         for (Order order : orders) {
-            List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(order.getOrderId()); // 获取订单项
+            List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(order.getOrderId());
             for (OrderItem orderItem : orderItems) {
                 int productId = orderItem.getProductId();
                 String productName = productMapper.getNameById(productId);
@@ -164,7 +148,9 @@ public class OrderController {
                 if (salesMap.containsKey(productId)) {
                     Sale existingSale = salesMap.get(productId);
                     existingSale.setProductQuantity(existingSale.getProductQuantity() + quantity);
-                    existingSale.setProductTotalPrice(existingSale.getProductTotalPrice().add(totalPrice));
+                    existingSale.setProductTotalPrice(existingSale
+                                                        .getProductTotalPrice()
+                                                        .add(totalPrice));
                 } else {
                     // 如果没有该商品，则创建新的 Sale 对象并加入 salesMap
                     Sale newSale = new Sale();
@@ -178,13 +164,8 @@ public class OrderController {
         }
         // 将所有销售记录从 salesMap 转换为列表
         salesList.addAll(salesMap.values());
-
         return Result.success(salesList);
     }
-//    // 更新订单状态（仅管理员可用）
-//    @PutMapping("/{id}/status")
-//    public ResponseEntity<Order> updateOrderStatus(@PathVariable Integer id, @RequestBody OrderStatusRequest statusRequest) {
-//        return ResponseEntity.ok(orderService.updateOrderStatus(id, statusRequest));
-//    }
+
 }
 

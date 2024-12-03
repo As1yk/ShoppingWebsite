@@ -43,64 +43,48 @@ public class UserController {
             return Result.error("服务器内部错误");  // 捕获异常时返回统一错误响应
         }
     }
+
     // 用户登录
     @PostMapping("/login")
     public Result login(@RequestBody User user) {
-        String username = user.getUsername();
-        String password = user.getPassword();
-        String role = user.getRole();
+        String username = user.getUsername();  // 获取用户名
+        String password = user.getPassword();  // 获取密码
+        String role = user.getRole();  // 获取角色
         try {
-            // 服务层返回一个布尔值，表示是否注册成功
-            boolean isAuthenticated = userService.login(username,password, role);
+            // 服务层返回一个布尔值，表示是否认证成功
+            boolean isAuthenticated = userService.login(username, password, role);
             if (isAuthenticated) {
-                return Result.success("登录成功");  // 注册成功时返回成功响应
+                return Result.success("登录成功");  // 登录成功时返回成功响应
             } else {
-                return Result.error("登录失败，账号或密码错误"); // 注册失败时返回错误消息
+                return Result.error("登录失败，账号或密码错误"); // 登录失败时返回错误消息
             }
         } catch (Exception e) {
             return Result.error("服务器内部错误");  // 捕获异常时返回统一错误响应
         }
     }
-    //销售员查询信息
+
+    // 销售员查询信息（统计订单数、用户数、商品数）
     @GetMapping("/init")
     public Result init() {
         class AdminCount {
-            public Integer ordersCount;
-            public Integer usersCount;
-            public Integer productsCount;
+            public Integer ordersCount;  // 订单数量
+            public Integer usersCount;   // 用户数量
+            public Integer productsCount; // 商品数量
         }
         AdminCount adminCount = new AdminCount();
-        adminCount.ordersCount = orderService.Count();
-        adminCount.usersCount = userService.Count() - 1;
-        adminCount.productsCount = productService.Count();
-        return Result.success(adminCount);
+        adminCount.ordersCount = orderService.Count();  // 获取订单数量
+        adminCount.usersCount = userService.Count() - 1; // 获取用户数量（减去管理员）
+        adminCount.productsCount = productService.Count(); // 获取商品数量
+        return Result.success(adminCount);  // 返回统计结果
     }
-    //销售端获取客户详情
+
+    // 销售端获取客户详情
     @GetMapping("/page")
     public Result getUsersByPage() {
-//        // 设置分页参数
-//        PageHelper.startPage(pageNumber, pageSize);
-
-        // 根据搜索条件查询客户
-        List<User> users = userMapper.findAllCustomers();
-
-//        // 获取分页后的客户数据
-//        PageInfo<User> pageInfo = new PageInfo<>(users);
-//        List<Order> orders = orderService.getOrdersByPage(pageNumber, pageSize);
-        return Result.success(users);
+        List<User> users = userMapper.findAllCustomers();  // 查询所有客户信息
+        return Result.success(users);  // 返回客户信息
     }
-//
-//    // 用户注销
-//    @PostMapping("/logout")
-//    public ResponseEntity<Void> logout() {
-//        userService.logout();
-//        return ResponseEntity.ok().build();
-//    }
-//
-//    // 获取所有用户（仅管理员可用）
-//    @GetMapping
-//    public ResponseEntity<List<User>> getAllUsers() {
-//        return ResponseEntity.ok(userService.getAllUsers());
-//    }
+
+
 }
 

@@ -12,12 +12,6 @@ import java.util.List;
 @Mapper
 public interface ProductMapper {
 
-//    @Insert("INSERT INTO products (name, price, stock) VALUES (#{name}, #{price}, #{stock})")
-//    void insertProduct(Product product);
-//
-//    @Select("SELECT * FROM products WHERE product_id = #{productId}")
-//    Product findById(Integer productId);
-
     @Select("SELECT * FROM products")
     List<Product> findAll();
 

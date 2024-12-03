@@ -43,10 +43,5 @@ public interface OrderMapper {
     @Select("SELECT * FROM orders\n" +
             "WHERE order_id LIKE #{search}")
     List<Order> searchOrders(String search);
-//    @Update("UPDATE orders SET status = #{status} WHERE order_id = #{orderId}")
-//    void updateOrderStatus(@Param("orderId") Integer orderId, @Param("status") Order.OrderStatus status);
-//
-//    @Delete("DELETE FROM orders WHERE order_id = #{orderId}")
-//    void deleteOrder(Integer orderId);
 }
 
